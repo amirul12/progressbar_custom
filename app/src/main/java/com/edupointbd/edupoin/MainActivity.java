@@ -1,6 +1,9 @@
 package com.edupointbd.edupoin;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -10,6 +13,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.util.Consumer;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
@@ -17,29 +21,51 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+
 import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity {
+import im.delight.android.webview.AdvancedWebView;
 
+public class MainActivity extends AppCompatActivity implements AdvancedWebView.Listener {
+
+    private AdView mAdView;
     private ProgressDialog pd;
     private ProgressBar progressBar;
     private Handler mHandler;
     private int progressInt;
+    private AdvancedWebView mWebView;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
+
+
+        mWebView = (AdvancedWebView) findViewById(R.id.webview);
+        mWebView.setListener(this, (AdvancedWebView.Listener) this);
+        mWebView.loadUrl("http://www.edupointbd.com");
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setProgress(0);
         mHandler = new Handler();
-        runnable.run();
+       // runnable.run();
+
+
+
+       /* mAdView = findViewById(R.id.adView);
+        mAdView.setAdSize(AdSize.BANNER);
+        mAdView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);*/
+
 
 
 
@@ -97,5 +123,74 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onPageStarted(String url, Bitmap favicon) {
+
+    runnable.run();
+    progressBar.setVisibility(View.VISIBLE);
+   // progressBar.setIndeterminate(true);
+
+    }
+
+    @Override
+    public void onPageFinished(String url) {
+        mHandler.removeCallbacks(runnable);
+
+        progressBar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onPageError(int errorCode, String description, String failingUrl) {
+
+    }
+
+    @Override
+    public void onDownloadRequested(String url, String suggestedFilename, String mimeType, long contentLength, String contentDisposition, String userAgent) {
+
+    }
+
+    @Override
+    public void onExternalPageRequest(String url) {
+
+    }
+
+
+    @SuppressLint("NewApi")
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mWebView.onResume();
+
+    }
+
+    @SuppressLint("NewApi")
+    @Override
+    protected void onPause() {
+        mWebView.onPause();
+
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mWebView.onDestroy();
+
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        mWebView.onActivityResult(requestCode, resultCode, intent);
+        Log.d("Volde","code"+requestCode+" "+requestCode+ " inf");
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!mWebView.onBackPressed()) { return; }
+        super.onBackPressed();
     }
 }
